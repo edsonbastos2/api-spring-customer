@@ -3,6 +3,7 @@ package com.geladaExpress.customerconnect.controller;
 import com.geladaExpress.customerconnect.controller.dto.ApiResponse;
 import com.geladaExpress.customerconnect.controller.dto.CreateCustomerDto;
 import com.geladaExpress.customerconnect.controller.dto.PaginationResponse;
+import com.geladaExpress.customerconnect.controller.dto.UpdateCustomerDto;
 import com.geladaExpress.customerconnect.entity.CustomerEntity;
 import com.geladaExpress.customerconnect.service.CustomerService;
 import org.springframework.data.domain.Page;
@@ -41,5 +42,39 @@ public class Customercontroller {
                 pageResp.getContent(),
                 new PaginationResponse(pageResp.getNumber(), pageResp.getSize(), pageResp.getTotalElements(), pageResp.getTotalPages())
         ));
+    }
+
+    @GetMapping(path = "/{customerId}")
+    public ResponseEntity<CustomerEntity> findById(@PathVariable("customerId") Long customerId) {
+
+        var customer = service.findById(customerId);
+
+        return customer.isPresent() ?
+                ResponseEntity.ok(customer.get()) :
+                ResponseEntity.notFound().build();
+
+    }
+
+    @PutMapping(path = "/{customerId}")
+    public ResponseEntity<CustomerEntity> updateById(@PathVariable("customerId") Long customerId,
+                                                     @RequestBody UpdateCustomerDto dto) {
+
+        var customer = service.updateById(customerId, dto);
+
+        return customer.isPresent() ?
+                ResponseEntity.noContent().build():
+                ResponseEntity.notFound().build();
+
+    }
+
+    @DeleteMapping(path = "/{customerId}")
+    public ResponseEntity<CustomerEntity> deleteById(@PathVariable("customerId") Long customerId) {
+
+        var deleted = service.deleteById(customerId);
+
+        return deleted ?
+                ResponseEntity.noContent().build():
+                ResponseEntity.notFound().build();
+
     }
 }

@@ -2,6 +2,7 @@ package com.geladaExpress.customerconnect.service;
 
 import ch.qos.logback.core.util.StringUtil;
 import com.geladaExpress.customerconnect.controller.dto.CreateCustomerDto;
+import com.geladaExpress.customerconnect.controller.dto.UpdateCustomerDto;
 import com.geladaExpress.customerconnect.entity.CustomerEntity;
 import com.geladaExpress.customerconnect.repository.CustomerRepository;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -64,5 +67,43 @@ public class CustomerService {
             direction = Sort.Direction.ASC;
         }
         return PageRequest.of(page, pageSize, direction, "createdAt" );
+    }
+
+    public Optional<CustomerEntity> findById(Long customerId) {
+        return repository.findById(customerId);
+    }
+
+    public Optional<CustomerEntity> updateById(Long customerId, UpdateCustomerDto dto) {
+        var customer = repository.findById(customerId);
+
+        if(customer.isPresent()) {
+            updateFields(dto, customer);
+            repository.save(customer.get());
+        }
+        return customer;
+    }
+
+    private void updateFields(UpdateCustomerDto dto, Optional<CustomerEntity> customer) {
+        if(hasText(dto.fullName())) {
+            customer.get().setFullName(dto.fullName());
+        }
+
+        if(hasText(dto.email())) {
+            customer.get().setEmail(dto.email());
+        }
+
+        if(hasText(dto.phoneNumber())) {
+            customer.get().setPhoneNumber(dto.phoneNumber());
+        }
+    }
+
+    public boolean deleteById(Long customerId) {
+        var exists = repository.existsById(customerId);
+
+        if(exists) {
+            repository.deleteById(customerId);
+        }
+
+        return exists;
     }
 }
